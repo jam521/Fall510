@@ -1,0 +1,78 @@
+---
+title: "HW5"
+author: "Jason Michaels"
+date: "October 4, 2015"
+output: html_document
+---
+```{r}
+require(ggplot2)
+```
+
+
+Using	the	diamonds	data:
+
+
+1. Figure	out	how	to	generically	extract	all	numeric	columns	from	
+any	data	frame	so	the	method	you	develop	can	be	used	on	any	
+data.
+
+```{r}
+diamonds[sapply(diamonds, is.numeric)] #The sapply function goes through every column in our data frame diamonds and determines which ones are numeric, returning TRUE and FALSE accordingly. Placing the result of the function inside brackets after diamonds returns the columns in diamonds that have been deemed numeric by sapply. This can be done for any data frame by substituting its name for diamonds in the two instances it occurs above. 
+```
+
+
+2. Create	a	data	frame	that	contains	each	pair	of	variable	names	in
+the	first	column	in	a	single	string	separated	by	a	-,	e.g.	for	the	
+variables	x	and	y,	you	should	form	the	string	“x-y” (HINT: Look	at	
+the	help	provided	for	the	paste	function)	and	their	corresponding	
+Pearson	correlation	coefficient	in	the	second	column.	(HINT:
+There	is	a	function	that calculates	correlation	coefficients	– look	
+carefully	at	what	is	returned	and	optimize	how	you	extract	the	
+correlation	coefficients).	Do	not	repeat	any	pairs.
+```{r}
+cols = names(diamonds) #Defines cols as a vector consisting of the names of the columns of diamonds. 
+pairs = character() #Creates an empty vector of class character. 
+correlations = numeric() #Creats an empty vector of class numeric 
+for(i in 1:(length(cols)-1)){ #Goes through every number from 1 to the length of the cols vector minus 1. 
+  for(j in (i+1):(length(cols))){ #Goes through every number from the current number i to the length of the cols vector. 
+    pairs <- c(pairs, paste(cols[i], cols[j], sep = '-')) #The paste function takes any number of objects (in this case, cols[i] and cols[j]) and converts them to a string with a separator (in this case '-') in between them. The result of this function is to append all possible pairs of variable names in diamonds to our initially empty string pairs. 
+    if(is.numeric(diamonds[[i]])){ 
+      if(is.numeric(diamonds[[j]])){ 
+        correlations <- c(correlations, cor(diamonds[[i]], diamonds[[j]]))
+        #If our current indices i and j refer to numeric columns of diamonds, then we add the correlation of those columns to our correlations vector. 
+      } else {
+        correlations <- c(correlations, 'N/A')
+      }
+    } else {
+      correlations <- c(correlations, 'N/A')
+      #Otherwise, we add 'N/A' to the correlations vector, indicating that we cannot find the correlation of the two variables. 
+    }
+  }
+}
+
+pairs 
+correlations
+
+data.frame(pairs, correlations)
+```
+
+3. Create	and	label	a	scatter	plot	for	every	pair	of	numeric	variables.
+Add	a	title	to	the	plot	that	contains	the	calculated	Pearson	
+correlation	coefficient	of	variables	contained	in	the	plot. (HINT:	
+You	should	figure	out	how	to	extract	all	numeric	columns	from	a	
+data	frame	so	your	method	can	be	used	on	any	data	frame.)
+```{r}
+numdata <- diamonds[sapply(diamonds, is.numeric)] #This is the same operation used earlier on in the homework. It returns all columns in diamonds that consist of numeric variables. We assign this columns to the data frame numdata. 
+
+for(i in 1:(length(numdata)-1)){ #Goes through every number from 1 to the length of the numdata vector minus 1
+  for(j in (i+1):(length(numdata))){ #Goes through every number from the current number i to the length of the numdata vector. 
+    plot(numdata[[i]], numdata[[j]], main = cor(numdata[[i]],
+      numdata[[j]]), xlab = names(numdata[i]), ylab = names(numdata[j]))
+    #Goes through every possible pair of numeric variables in diamonds and creates a scatterplot of their values with the plot function. The input main = cor(numdata[[i]], numdata[[j]]) makes the title of each scatterplot the correlation of the two variables contained therein. The xlab and ylab inputs are used to label the axes with the variable names. 
+  }
+}
+    
+
+
+```
+
