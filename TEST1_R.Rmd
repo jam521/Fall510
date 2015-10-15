@@ -14,7 +14,7 @@ data(diamonds)
 
 Using the diamonds data:
 
-1. Add a logical column to diamonds based on the ratio of 1’s and 0’s in the mtcars$vs variable. The variable in mtcars is numeric meaning that you will need to create a logical equivalent, extend it to the same length as diamonds and add it to diamonds data frame.
+Add a logical column to diamonds based on the ratio of 1’s and 0’s in the mtcars$vs variable. The variable in mtcars is numeric meaning that you will need to create a logical equivalent, extend it to the same length as diamonds and add it to diamonds data frame.
 
 
 ```{r}
@@ -23,13 +23,19 @@ newsample <- sample(mtcarsT, 53940, replace=TRUE) #The sample function allows us
 diamonds$logicalcol <- newsample #This adds a new column, called logicalcol, to diamonds. The column we are adding is the newsample vector, i.e. the vector of TRUE and FALSE created by the sample function. 
 ```
 
-2. Figure out how to generically extract all factor and logical columns from any data frame so the method you develop can be used on any data.
+Figure out how to generically extract all factor and logical columns from any data frame so the method you develop can be used on any data.
 
 ```{r}
 logicalframe <- diamonds[sapply(diamonds, is.logical)] #The s apply function takes in our diamonds data frame, and applies the function is.logical to each of its columns. This returns a vector of TRUE and FALSE, where there are TRUEs in locations corresponding to the logical columns of diamonds, and FALSEs corresponding to all other columns of diamonds. By placing this resulting vector in brackets after diamonds, we are returning all columns of diamonds for which is.logical returned TRUE (i.e. we are returning all logical columns of diamonds). Here I am assigning the returned column to the name logicalframe. 
+factorframe <- diamonds[sapply(diamonds, is.factor)] #Here we are doing the same for all columns whose elements are categorical variables. 
+
+lf_extract <- function(df){ #Here is a function that allows you to extract the logical and categorical columns from any data frame. The function lf_extract takes any data frame df as an input. It then extracts the logical and categorical columns as done above, and returns a data frame consisting of those columns concatenated together. 
+return(data.frame(df[sapply(df, is.logical)], df[sapply(df, is.factor)]))
+}
+lf_extract(diamonds)
 ```
 
-3. Plot a gray bar graph for every factor and logical variable.
+Plot a gray bar graph for every factor and logical variable.
 
 ```{r}
 
@@ -50,7 +56,7 @@ for(i in factorframe){ #Goes through every column in factorframe
 
 ```
 
-4. Create a list of frequency tables that contains one table for each categorical and logical variable in the data frame.
+Create a list of frequency tables that contains one table for each categorical and logical variable in the data frame.
 ```{r}
 freq_list = NULL #Creates an empty list called freq_list. This will be appended and made into a list of frequency tables. 
 for(i in factorframe){ #Goes through every column in factorframe (i.e. every column of categorical variables)
