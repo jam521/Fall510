@@ -1,0 +1,64 @@
+---
+title: "TEST1_R"
+author: "Jason Michaels"
+date: "October 12, 2015"
+output: html_document
+---
+
+```{r}
+require(ggplot2)
+data(diamonds)
+```
+
+
+
+Using the diamonds data:
+
+1. Add a logical column to diamonds based on the ratio of 1’s and 0’s in the mtcars$vs variable. The variable in mtcars is numeric meaning that you will need to create a logical equivalent, extend it to the same length as diamonds and add it to diamonds data frame.
+
+
+```{r}
+mtcarsT <- mtcars$vs == 1 #This creates a vector mtcarsT, where each element is either TRUE or FALSE. It is TRUE if the corresponding element of mtcars$vs is equal to 1, and FALSE if it is equal to 0. 
+newsample <- sample(mtcarsT, 53940, replace=TRUE) #The sample function allows us to create a new vector by sampling from elements of another vector. Here, we pick 53940 (the amount of elements in diamonds) from the mtcarsT vector with replacement. This gives us 53940 elements, which are either TRUE or FALSE, and whose ratio should be approximately that of the ratio of 1s to 0s in mtcars$vs. 
+diamonds$logicalcol <- newsample #This adds a new column, called logicalcol, to diamonds. The column we are adding is the newsample vector, i.e. the vector of TRUE and FALSE created by the sample function. 
+```
+
+2. Figure out how to generically extract all factor and logical columns from any data frame so the method you develop can be used on any data.
+
+```{r}
+logicalframe <- diamonds[sapply(diamonds, is.logical)] #The s apply function takes in our diamonds data frame, and applies the function is.logical to each of its columns. This returns a vector of TRUE and FALSE, where there are TRUEs in locations corresponding to the logical columns of diamonds, and FALSEs corresponding to all other columns of diamonds. By placing this resulting vector in brackets after diamonds, we are returning all columns of diamonds for which is.logical returned TRUE (i.e. we are returning all logical columns of diamonds). Here I am assigning the returned column to the name logicalframe. 
+```
+
+3. Plot a gray bar graph for every factor and logical variable.
+
+```{r}
+
+logic_index = 1 #Define a variable logic_index as 1. We will use this to title our bar graphs. 
+for(i in logicalframe){ #Goes through every column in our df logicalframe (created above)
+  counts <- table(i) #Uses the table function to create a frequency table of the elements in i. 
+  barplot(counts, main=names(logicalframe[logic_index])) #Creates a bargraph according to the frequency table. We use the main input to title our bargraph with the name of the column we are plotting. 
+  logic_index = logic_index + 1 #Increase the number logic_index. This means that if we have another column to graph from logicalframe, we know to title it with the name of that column (rather than the name of the column before it)
+}
+
+factorframe <- diamonds[sapply(diamonds, is.factor)] #Creates a df factorframe, which consists of all factor variables in diamonds. We do this by using the sapply function in the same way we did to create logicalframe. 
+factor_index = 1 #Define a variable factor_index as 1. We will use this to title our bar graphs. 
+for(i in factorframe){ #Goes through every column in factorframe
+  counts <- table(i) #Creates a frequency table of the elements in i
+  barplot(counts, main=names(factorframe[factor_index])) #Create a bar graph according to the frequency table. The main input titles the graph with the name of the appropriate column from factorframe. 
+  factor_index = factor_index + 1 #Adds 1 to our variable factor_index, so we title the next graph appropriately. 
+}
+
+```
+
+4. Create a list of frequency tables that contains one table for each categorical and logical variable in the data frame.
+```{r}
+freq_list = NULL #Creates an empty list called freq_list. This will be appended and made into a list of frequency tables. 
+for(i in factorframe){ #Goes through every column in factorframe (i.e. every column of categorical variables)
+  freq_list = c(freq_list, table(i)) #and creates a frequency table of that column, adds that table to our list freq_list
+}
+for(i in logicalframe){ #Does the same for every column in logicalframe. 
+  freq_list = c(freq_list, table(i))
+}
+freq_list
+```
+
