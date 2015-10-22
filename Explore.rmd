@@ -1,0 +1,128 @@
+---
+title: "Explore"
+author: "Jason Michaels"
+date: "October 19, 2015"
+output: html_document
+---
+
+
+```{r}
+require(ggplot2)
+data(diamonds)
+data(mtcars)
+```
+
+Below, I am appending on a logical column to the diamonds data frame. This will be input into our explore function as a test later on. 
+```{r}
+mtcarsT <- mtcars$vs == 1 #This creates a vector mtcarsT, where each element is either TRUE or FALSE. It is TRUE if the corresponding element of mtcars$vs is equal to 1, and FALSE if it is equal to 0. 
+newsample <- sample(mtcarsT, 53940, replace=TRUE) #The sample function allows us to create a new vector by sampling from elements of another vector. Here, we pick 53940 (the amount of elements in diamonds) from the mtcarsT vector with replacement. This gives us 53940 elements, which are either TRUE or FALSE, and whose ratio should be approximately that of the ratio of 1s to 0s in mtcars$vs. 
+diamonds$logicalcol <- newsample #This adds a new column, called logicalcol, to diamonds. The column we are adding is the newsample vector, i.e. the vector of TRUE and FALSE created by the sample function. 
+```
+
+
+
+```{r}
+explore <- function(df, bin_sizes, corr_threshold){
+
+#PART I 
+  n <- df[sapply(df, is.numeric)] #Creates a variable n, which is assigned to the dataframe containing all of our numerical columns. We obtain this data frame by using the sapply function (which applies a function to all elements of our data frame). This function goes through our df one column at a time and determines whether that column contains numeric values (with the is.numeric function). Placing the result of the sapply function in brackets after df, we obtain only the numeric columns of our data frame. 
+  for(i in 1:length(n)){ #Goes through each number from 1 to the length of n
+    for(j in bin_sizes){ #Goes through each element of bin_sizes
+      variab <<- n[[i]] #Assigns the ith value in n to the name variab. 
+      print(ggplot(df, aes(x=variab)) + geom_histogram(binwidth = j, fill='steelblue')
+      + geom_vline(aes(xintercept=mean(variab), colour = 'red')) + labs(x=names(n[i])))
+      #Above, we used the ggplot function to create a histogram of our particular              #variable in n. ggplot(df, aes(x=variab)) indicates that we will be examining data       #from df and using variab as the basis for our data. 
+      #We then add a layer to our plot, which is a histogram of binwidth j, and the color       #blue. Then we add another layer using geom_vline. This creates a red line down our
+      #histogram that intersects the x axis at the mean value of the variable we are 
+      #examining. The final layer added to the plot labels the x axis with the name of
+      #our variable. This line creates one such histogram for each bin width j. 
+  
+      print(ggplot(df, aes(x=variab)) + geom_histogram(aes(y= ..density..), binwidth =
+      j, fill='steelblue') + geom_vline(aes(xintercept=mean(variab), colour = 'red'))           + labs(x=names(n[i])))
+      #This operates the same as the line above. This time, however, we are creating 
+      #density histograms for each bin width j. We do this by changing the input to our 
+      #geom_histogram layer. Here we write y=..density.., to indicate that we will
+      #be doing so. 
+    }
+  }  
+
+#PART II   
+  f <- df[sapply(df, is.factor)] #Comes up with a list f of categorical columns in our dataframe. We do this with the sapply function, which applies the function is.factor to each of the columns in our dataframe. Those columns for which the function returns true become a part of f. 
+  if(length(f)==0){ #If there are no categorical variables, then we print the statement
+    print("no categorical variables") #"no categorical variables"
+  }
+  else{ #If there are categorical variables, then we go through each column 
+    for(i in 1:length(f)){ #and make a barplot of it. 
+      barplot(table(f[[i]])) #We do this by putting the table function (which comes up with a frequency table for our column) as an input of our barplot function. 
+    }
+  }
+  b <- df[sapply(df, is.logical)] #We do the same thing as above with all logical variables. This time, we put the function is.logical as an input to our function sapply. 
+  if(length(b)==0){
+    print("no binary variables")
+  }
+  else{
+    for(i in 1:length(b)){
+      barplot(table(b[[i]]))
+    }
+  }
+  
+  #PART III
+  for(i in 1:(length(n)-1)){ #Indexes through every one of our numerical variables (which     #we found before and assigned to the value n), except for the last variable. 
+    for(j in (i+1):length(n)){ #For each variable in our index, goes through each variable after it. 
+      print((cor(n[i], n[j]))**2) #For each of those pairs of variables, prints the correlation of that pair. The way we have indexed the variables does not allow for any correlations to be repeated. 
+    }
+  }
+  
+  #PART IV 
+  #FREQUENCY TABLES
+  factor_table <- NULL #Creates variable factor_table, which will be appended and returned. 
+  for(i in f){ #Goes through every one of our categorical variables (obtained earlier and assigned to the value f.)
+    factor_table <- c(factor_table, table(i)) #For each of those variables, adds a frequency table (obtained with the table function) to our list factor_table
+  }
+  print(factor_table)#Prints our factor_table after it is done. 
+  
+  binom_table <- NULL #Does the same thing for binomial variables. Just uses our list b of binomial variables rather than f. 
+  for(i in b){
+    binom_table <- c(binom_table, table(i))
+  }
+  print(binom_table)
+  
+  #SUMMARY STATISTICS
+  for(i in n){ #Goes through each of our numerical variables
+    print(summary(i)) #For each variable, returns a summary statistics table (obtained using the summary function)
+    
+  
+  }
+  
+  #DATA FRAME WITH ALL VARIABLE PAIRS AND ASSOCIATED R SQUARED
+  pairs <- NULL #Creates an empty list pairs. 
+  r_squared <- NULL #Creates an empty list r_squared
+  for(i in 1:(length(n)-1)){ #Indexes all numerical variables, so that we end up
+    for(j in (i+1):length(n)){ #evaluating all possible pairs in n (same as PART III)
+      pairs <- c(pairs, paste(names(n[i]), names(n[j]), sep = '-')) #Adds the name of the pair we are on to our pairs list. We use the paste function to create a single string with the two names separated by the character '-'. 
+      r_squared <- c(r_squared, cor(n[i],n[j])**2) #Adds the r-squared value between the two variables at hand to the list r_squared. We obtain this value by using the cor function and squaring our result. 
+    }
+  }
+  names_rsquared <- data.frame(pairs, r_squared) #Creates a data frame called names_rsquared. We do this with the data.frame function. We input our appended pairs and r_squared vectors as our two columns. 
+  print(names_rsquared) #Print the data frame. 
+  
+  #DATA FRAME WITH ALL VARIABLE NAMES AND CORRELATIONS IF ABOVE CORR_THRESHOLD
+  pairs2 <- NULL #Creates an empty list is called pairs2. 
+  Pearson <- NULL #Creates an empty list called Pearson. 
+  for(i in 1:(length(n)-1)){ #Indexes through each pair of numerical variables as 
+    for(j in (i+1):length(n)){ #done before. 
+      if (abs(cor(n[i],n[j]))>corr_threshold){ #If the absolute value of the correlation
+        #of our two variables is less than our correlation threshold:
+        pairs2 <- c(pairs2, paste(names(n[i]), names(n[j]))) #Add the names of our two variables to our pairs2 vector. 
+        Pearson <- c(Pearson, cor(n[i], n[j])) #And add the correlation of those two variables to our Pearson vector. 
+      }
+    }
+  }
+  correlationframe <- data.frame(pairs2, Pearson) #Create a new data frame containing the two vectors pairs2 and Pearson. 
+  print(correlationframe) #Print the data frame. 
+}
+
+
+explore(diamonds, c(5,20,50), .25)
+explore(mtcars, c(5,20,50), .25)
+```
