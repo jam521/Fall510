@@ -1,0 +1,488 @@
+---
+title: "Test2"
+author: "Jason Michaels"
+date: "November 19, 2015"
+output: html_document
+---
+
+First, we need to retrieve the abalone data and place it into a data set. The following code has been taken from the class notes:
+```{r}
+require(ggplot2) #Both ggplot2 and grid will be used to graph parts of our data, so we will require them both. 
+require(grid) 
+
+uciaddress <- "http://archive.ics.uci.edu/ml/machine-learning-databases/" #Creates a variable uciaddress that refers to the URL at which the abalone data can be found.
+dataset <- "abalone/abalone.data" #Creates a variable dataset referring to the file within the uci address. 
+getdataset <- paste(uciaddress, dataset, sep="") #Creates a variable getdataset, which is a string containing our url (uciaddress), followed by the data file name (dataset), and separated by a space. 
+abalone <- read.csv(getdataset) #Here, the read.csv function takes the designated data set (getdataset, which contains within itself the information needed to find the file), and assigns it to the name abalone.
+colnames(abalone) <- c("Gender","Length","Diameter",
+                       "Height", "Whole_wgt",
+                       "Shucked_wgt", "Viscera wgt",
+                       "Shell wgt", "Rings") #The colnames function assigns the names listed to the columns of abalone. The names are assigned in the order listed. 
+```
+
+1. Take	samples	of	1%,	10%,	25%,	50%,	80%,	and	100%	of	the	data.	Calculate	
+the	min,	max,	mean	and	variance of	the	Whole_wgt	column	from	each	sample	
+and	store	in	a	dataframe.	There	should	be	6 columns and	four rows in	the	
+dataframe	(a	column for	each	sample	size and	a	row	for	each	measure).	
+Name	the	mean	row	SampleMean,	the	other	rows	appropriately, and	the	
+columns based	on	the	%	sample. 
+
+```{r}
+rows <- nrow(abalone) #Here, we assign the variable rows to equal the number of rows within our data set. This will be used when we sample from abalone. 
+absample1 <- abalone[sample(rows, rows*.01),] #Here, we use the sample function to sample 1% of the rows within abalone. Writing sample(rows, rows*.01) samples 1% of the numbers (rounded to the nearest integer) within the range of nrow(abalone). We then place the result inside of brackets after abalone, which assigns the observations that correspond with our sampled numbers to the new data frame absample1.
+absample10 <- abalone[sample(rows, rows*.1),] #Here, we do the same as above, but now sampling 10, 25, 50, 80, and 100% of the data. We change the value within the sample function accordingly. 
+absample25 <- abalone[sample(rows, rows*.25),]
+absample50 <- abalone[sample(rows, rows*.5),]
+absample80 <- abalone[sample(rows, rows*.8),]
+absample100 <- abalone[sample(rows, rows),]
+
+data1 <- c(min(absample1$Whole_wgt), max(absample1$Whole_wgt), mean(absample1$Whole_wgt), var(absample1$Whole_wgt)) #This creates a vector called data1, which contains the min, max, mean, and variance of the Whole_wgt column of data1 (in that order). We do this through applying the min, max, mean, and var functions to abssample1$Whole_wgt, i.e. to the Whole_wgt column in abssample1. 
+data10 <- c(min(absample10$Whole_wgt), max(absample10$Whole_wgt), mean(absample10$Whole_wgt), var(absample10$Whole_wgt)) #Here, we do the same thing for the rest of our samples, and create appropriately named vectors. 
+data25 <- c(min(absample25$Whole_wgt), max(absample25$Whole_wgt), mean(absample25$Whole_wgt), var(absample25$Whole_wgt))
+data50 <- c(min(absample50$Whole_wgt), max(absample50$Whole_wgt), mean(absample50$Whole_wgt), var(absample50$Whole_wgt))
+data80 <- c(min(absample80$Whole_wgt), max(absample80$Whole_wgt), mean(absample80$Whole_wgt), var(absample80$Whole_wgt))
+data100 <- c(min(absample100$Whole_wgt), max(absample100$Whole_wgt), mean(absample100$Whole_wgt), var(absample100$Whole_wgt))
+
+sampleframe <- data.frame(data1, data10, data25, data50, data80, data100) #This uses the data.frame function to create a data frame containing our previously created data1, data10 ...  data100 vectors as columns. The output of the data.frame function is assigned to the name sampleframe. 
+rownames(sampleframe) <- c('Sample Minimum', 'Sample Maximum', 'Sample Mean', 'Sample Variance') #Here we use the rownames function to name the rows of our data frame according to the information they contain. We create a vector containing the names, in the order we would like them to be arranged, and then assign it to rownames(sampleframe). We could also rename the columns in a similar manner, using the colnames() function, but the columns are already named according to the samples they represent. 
+sampleframe
+
+abalone[1,]
+
+```
+
+2. Create a grid of histograms that contains all sample sizes. 
+```{r}
+hist1 <- ggplot(absample1, aes(x=Whole_wgt)) #Creates a histogram called hist1, which contains the data for Whole_wgt in our 1 percent sample. To do this, we use the ggplot function, with inputs absample1 (the data frame we take our data from), and aes(x=Whole_weight), which tells us what column to look at in crafting the histogram. 
+hist1 <- hist1 + geom_histogram() + labs(title = '1% Sample') #Adds layers to our variable hist1. First adds a histogram layer (using geom_histogram), and then adds the title '1% Sample' using the labs(title=) input. 
+
+hist10 <- ggplot(absample10, aes(x=Whole_wgt)) #Here, we similarly create histograms for the rest of our samples. 
+hist10 <- hist10 + geom_histogram() + labs(title = '10% Sample')
+
+hist25 <- ggplot(absample25, aes(x=Whole_wgt))
+hist25 <- hist25 + geom_histogram() + labs(title = '25% Sample')
+
+hist50 <- ggplot(absample50, aes(x=Whole_wgt))
+hist50 <- hist50 + geom_histogram() + labs(title = '50% Sample')
+
+hist80 <- ggplot(absample80, aes(x=Whole_wgt))
+hist80 <- hist80 + geom_histogram() + labs(title = '80% Sample')
+
+hist100 <- ggplot(absample100, aes(x=Whole_wgt))
+hist100 <- hist100 + geom_histogram() +labs(title = '100% Sample')
+
+grid.newpage() #This uses the grid package, and creates a new 'page'. This 'page' is what we will print our histograms on. 
+pushViewport(viewport(layout = grid.layout(2,3))) #The viewport function creates a viewport on our page. A viewport is a rectangular region which we will graph our histograms on. The input layout = grid.layout(2,3) creates a viewport divided into two rows and three columns. Inputting the result of our viewport function into pushViewport() makes the viewport grid we have created the current viewport. So when we decide to draw our histograms, they will be printed on that viewport. 
+
+vplayout <- function(x,y) #This creates a function vplayout. The function takes in x and y as inputs.
+viewport(layout.pos.row = x, layout.pos.col = y) #It then sets the current position in our current viewport to the xth row and yth column in our grid. This is done with the viewport function, where layout.pos.row and layout.pos.col assign the current row and column, respectively. 
+
+#Side note --- The vplayout function, which makes it easier to print our histograms where we want them, was taken from a tutorial on the grid package at http://ayeimanol-r.net/2013/04/22/getting-started-positioning-and-getting-multiple-plots-on-one-page-with-edited-labels-and-titles-output-as-a-pdf/. 
+
+print(hist1, vp = vplayout(1,1)) #We print our hist1 (i.e. the histogram for our 1% sample) to the grid square that occupies the first row and first column of our viewport. The first input to our print function, hist1, tells it what to print. The second input, vp, tells it where to print. We use our previously created function vplayout to print it to the first row and first column of our grid. 
+print(hist10, vp = vplayout(1,2)) #Then we do the same for our remaining histograms, printing them in different rows and columns to avoid overlap. 
+print(hist25, vp = vplayout(1,3))
+print(hist50, vp = vplayout(2,1))
+print(hist80, vp = vplayout(2,2))
+print(hist100, vp = vplayout(2,3))
+```
+
+3. Implement	a	loop	that	takes	1,000	samples	at	each	of	the	sample sizes	in	1	
+above (except	the 100% sample!).	Calculate	a	mean	at	each	iteration	and	
+store	the	results	in	a	dataframe.	There	should	be	four	columns	and	1,000	
+rows.	Name	the	columns	but	NOT	the	rows.
+
+```{r}
+sizes <- c(.01, .10, .25, .50, .80) #Here, we create a vector called sizes, containing all of the sample sizes we are going to use in our loop. 
+
+loop_data = data.frame(1:1000) #We also create a data frame called loop_data. This is what we will add our columns of means to. I was having difficulty adding the columns to a null data frame, so I am having the data frame start out as a single column that counts from 1 to 1000. After we have added what we need to this column, we will delete it. 
+
+for(i in sizes){ #Loops through each of our sample sizes
+  means = c() #Creates an empty vector, which will ultimately contain the means of our 1000 samples.
+  for(j in 1:1000){ #Iterates from 1 to 1000
+    s <- abalone[sample(rows, rows*i),] #At each iteration sets s equal to a random sample containing
+    #1, 10, 25, or 50 percent of the items in abalone, depending on our position in the loop. 
+    means[j] = mean(s$Whole_wgt) #Sets the jth value of means to equal the mean of our jth sample. 
+    if(j==1000){ #Once we have taken 1000 samples we add our means vector to the loop_data df. 
+      loop_data[paste0('Sample_', i)] <- means #We name the column using the paste function, which combines the string 'Sample', with the number i, which varies according to our position in the loop.
+    }
+  }
+}
+
+loop_data[1] <- NULL #Here, we get rid of the first column of our data frame, which contains the vector 1:1000.
+
+#loop_data
+
+```
+
+4. Create	another	grid	of	histograms	that	contains	the	four	columns	just	created	
+and	include	the 100%	sample from	1. (HINT:	You	should	create	a	function	to	
+solve	2	and	reuse	here).
+```{r}
+mean_hist1 <- ggplot(loop_data, aes(x=Sample_0.01)) #Here we create a histogram of the values corresponding to the means of our 1000 samples of 1% of the overall data. We do this with the ggplot function. We input loop_data to indicate the data frame we are taking our data from, and then we write aes(x=Sample_0.01) to indicate the relevant column within that data frame. 
+mean_hist1 <- mean_hist1 + geom_histogram() + labs(title = '1% Sample Means') #We then add a histogram layer to mean_hist1, and title it appropriately. 
+
+mean_hist10 <- ggplot(loop_data, aes(x=Sample_0.1)) #We do the same for the other three columns of our loop_data data frame. 
+mean_hist10 <- mean_hist10 + geom_histogram() + labs(title = '10% Sample Means') 
+
+mean_hist25 <- ggplot(loop_data, aes(x=Sample_0.25)) 
+mean_hist25 <- mean_hist25 + geom_histogram() + labs(title = '25% Sample Means') 
+
+mean_hist50 <- ggplot(loop_data, aes(x=Sample_0.5)) 
+mean_hist50 <- mean_hist50 + geom_histogram() + labs(title = '50% Sample Means') 
+
+mean_hist80 <- ggplot(loop_data, aes(x=Sample_0.8)) 
+mean_hist80 <- mean_hist80 + geom_histogram() + labs(title = '80% Sample Means') 
+
+grid.newpage() #The remainder of the code for number 4 is recycled from problem 2. 
+pushViewport(viewport(layout = grid.layout(2,3))) 
+
+vplayout <- function(x,y) 
+viewport(layout.pos.row = x, layout.pos.col = y) 
+
+print(mean_hist1, vp = vplayout(1,1)) 
+print(mean_hist10, vp = vplayout(1,2)) 
+print(mean_hist25, vp = vplayout(1,3))
+print(mean_hist50, vp = vplayout(2,1))
+print(mean_hist80, vp = vplayout(2,2))
+print(hist100, vp = vplayout(2,3)) #Here, we are including hist100 as a histogram within our 2x3 grid. This is not a histogram of means, but a histogram of the Whole_wgt column for the entirety of the abalone data. 
+```
+
+5. Calculate	the min,	max, mean	and	variance	of	each	column	from	3 and	of	the	
+total	dataset	(the	100%	sample).	Append	to	the	dataframe	created	in	1.	Name	
+the	mean	row	ResampleMean	and	the	others	appropriately. 
+```{r}
+ResampleMinimum <- c(min(loop_data$Sample_0.01), min(loop_data$Sample_0.1), min(loop_data$Sample_0.25), min(loop_data$Sample_0.5), min(loop_data$Sample_0.8), min(absample100$Whole_wgt)) #This creates a vector called ResampleMinimum. It contains the minimum values of the five columns in 3, as well as the 100% sample. We do this by using the min function on the columns of loop_data. 
+
+ResampleMaximum <- c(max(loop_data$Sample_0.01), max(loop_data$Sample_0.1), max(loop_data$Sample_0.25), max(loop_data$Sample_0.5), max(loop_data$Sample_0.8), max(absample100$Whole_wgt)) #We calculate vectors for the Maximum, Mean, and Variance similarly. 
+
+ResampleMean <- c(mean(loop_data$Sample_0.01), mean(loop_data$Sample_0.1), mean(loop_data$Sample_0.25), mean(loop_data$Sample_0.5), mean(loop_data$Sample_0.8), mean(absample100$Whole_wgt))
+
+ResampleVariance <- c(var(loop_data$Sample_0.01), var(loop_data$Sample_0.1), var(loop_data$Sample_0.25), var(loop_data$Sample_0.5), var(loop_data$Sample_0.8), var(absample100$Whole_wgt))
+
+sampleframe <- rbind(sampleframe, ResampleMinimum, ResampleMaximum, ResampleMean, ResampleVariance)
+#We then add these rows to our df sampleframe. We do this with the rbind function, which we can use to append the rows we have created to our sampleframe. The output is assigned to the dataframe sampleframe. 
+
+rownames(sampleframe) <- c('Sample Minimum', 'Sample Maximum', 'Sample Mean', 'Sample Variance', 'ResampleMinimum', 'ResampleMaximum', 'ResampleMean', 'ResampleVariance') #We rename the rows so that the four rows that we added are named appropriately. 
+
+sampleframe
+
+```
+
+6. Create	a single histogram	of	the	100%	data	and	overlay and	label lines	that	
+represent	the	1%,	10%,	25%,	50%,	and	80%	SampleMean.
+```{r}
+total_hist <- hist100 + geom_vline(aes(xintercept=mean(absample1$Whole_wgt), color="1_Percent"), size=1, show_guide=TRUE) + geom_vline(aes(xintercept=mean(absample10$Whole_wgt), color="10_Percent"), size=1, show_guide=TRUE) + geom_vline(aes(xintercept=mean(absample25$Whole_wgt), color="25_Percent"), size=1, show_guide=TRUE) + geom_vline(aes(xintercept=mean(absample50$Whole_wgt), color="50_Percent"), size=1, show_guide=TRUE) + geom_vline(aes(xintercept=mean(absample80$Whole_wgt), color="80_Percent"), size=1, show_guide=TRUE) + scale_colour_brewer(name = 'Sample Means', palette = 'Set1') + labs(title = '100% Sample with Sample Means')
+
+#The code above creates a histogram called total_hist. It assigns it to be equal to hist100 (i.e. the histogram of the 100% sample), and then it adds vertical lines indicating the means of the five sample sizes. This is done by adding layers with the geom_vline function. With each geom_vline layer, the xintercept = portion tells it which sample mean to draw the line at (the means are obtained using the mean function on the abssamples obtained in part 1). Normally, the input 'color = ' can be used to explicitly dictate what color to draw the line as. Here, however, we type in an identifier (e.g. '10_Percent'), which will be used to color the line later and to label it in the histogram's legend. show_guide = TRUE tells the function to put the vline into the legend we will be creating. After adding all of the vlines, we use the scale_colour_brewer layer to create our legend. The legend is named 'Sample Means'. We set palette = 'Set 1' to indicate which colors to make the mean lines. We could indicate the colors of the lines individually, but setting the palette causes ggplot to do this automatically. 
+
+
+print(total_hist)
+```
+
+7. Create	a	second	histogram	of	the	100%	data	and	overlay and	label	vertical
+lines	that	represent	the	1%,	10%,	25%,	50%,	and	80%	ResampleMean
+```{r}
+resample_total_hist <- hist100 + geom_vline(aes(xintercept=ResampleMean[1], color="1_Percent"), size=1, show_guide=TRUE) + geom_vline(aes(xintercept=ResampleMean[2], color="10_Percent"), size=1, show_guide=TRUE) + geom_vline(aes(xintercept=ResampleMean[3], color="25_Percent"), size=1, show_guide=TRUE) + geom_vline(aes(xintercept=ResampleMean[4], color="50_Percent"), size=1, show_guide=TRUE) + geom_vline(aes(xintercept=ResampleMean[5], color="80_Percent"), size=1, show_guide=TRUE) + scale_colour_brewer(name = 'Resample Means', palette = 'Set1') + labs(title = '100% Sample with Sample Means')
+
+#Here we create a histogram the exact same way as in number 6. This time, however, we add vlines add the resample means for each sample size. We can obtain these means from our ResampleMean vector from number 5. 
+
+print(resample_total_hist)
+```
+
+8. Now	execute	your	code	on	diamonds$carat	and	faithful$eruptions.
+
+First, faithful:
+```{r}
+
+###SAMPLING FROM DATA 
+
+data(faithful) #Import faithful data frame. 
+
+rows <- nrow(faithful) #Taking samples of varying sizes from the faithful data frame, in the same way done for abalone. See #1 for detailed explanation 
+fsample1 <- faithful[sample(rows, rows*.01),] 
+fsample10 <- faithful[sample(rows, rows*.1),] 
+fsample25 <- faithful[sample(rows, rows*.25),]
+fsample50 <- faithful[sample(rows, rows*.5),]
+fsample80 <- faithful[sample(rows, rows*.8),]
+fsample100 <- faithful[sample(rows, rows),]
+
+fdata1 <- c(min(fsample1$eruptions), max(fsample1$eruptions), mean(fsample1$eruptions), var(fsample1$eruptions)) #Creating vectors containing min, max, mean, var of the samples we took above. 
+fdata10 <- c(min(fsample10$eruptions), max(fsample10$eruptions), mean(fsample10$eruptions), var(fsample10$eruptions)) 
+fdata25 <- c(min(fsample25$eruptions), max(fsample25$eruptions), mean(fsample25$eruptions), var(fsample25$eruptions)) 
+fdata50 <- c(min(fsample50$eruptions), max(fsample50$eruptions), mean(fsample50$eruptions), var(fsample50$eruptions)) 
+fdata80 <- c(min(fsample80$eruptions), max(fsample80$eruptions), mean(fsample80$eruptions), var(fsample80$eruptions)) 
+fdata100 <- c(min(fsample100$eruptions), max(fsample100$eruptions), mean(fsample100$eruptions), var(fsample100$eruptions)) 
+
+fsampleframe <- data.frame(fdata1, fdata10, fdata25, fdata50, fdata80, fdata100) #Create data frame containing the fdata vectors as columns. 
+
+rownames(fsampleframe) <- c('Sample Minimum', 'Sample Maximum', 'Sample Mean', 'Sample Variance') #Rename the rows of our data frame appropriately. 
+
+fsampleframe
+
+#### CREATING HISTOGRAMS 
+
+fhist1 <- ggplot(fsample1, aes(x=eruptions)) 
+fhist1 <- fhist1 + geom_histogram() + labs(title = '1% Sample') #Creates histogram of our samples using ggplot. 
+
+fhist10 <- ggplot(fsample10, aes(x=eruptions)) 
+fhist10 <- fhist10 + geom_histogram() + labs(title = '10% Sample')
+
+fhist25 <- ggplot(fsample25, aes(x=eruptions)) 
+fhist25 <- fhist25 + geom_histogram() + labs(title = '25% Sample')
+
+fhist50 <- ggplot(fsample50, aes(x=eruptions)) 
+fhist50 <- fhist50 + geom_histogram() + labs(title = '50% Sample')
+
+fhist80 <- ggplot(fsample80, aes(x=eruptions)) 
+fhist80 <- fhist80 + geom_histogram() + labs(title = '80% Sample')
+
+fhist100 <- ggplot(fsample100, aes(x=eruptions)) 
+fhist100 <- fhist100 + geom_histogram() + labs(title = '100% Sample')
+
+
+grid.newpage() #Now we have to create a grid of histograms. We will do this using the grid package, the same as we did for abalone. 
+pushViewport(viewport(layout = grid.layout(2,3))) 
+
+vplayout <- function(x,y) 
+viewport(layout.pos.row = x, layout.pos.col = y) 
+
+print(fhist1, vp = vplayout(1,1))  
+print(fhist10, vp = vplayout(1,2)) 
+print(fhist25, vp = vplayout(1,3))
+print(fhist50, vp = vplayout(2,1))
+print(fhist80, vp = vplayout(2,2))
+print(fhist100, vp = vplayout(2,3))
+
+### TAKING 1,000 SAMPLES AT EACH SAMPLE SIZE 
+
+sizes <- c(.01, .10, .25, .50, .80) 
+
+floop_data = data.frame(1:1000) 
+
+for(i in sizes){ #Loops through each of our sample sizes
+  means = c() #Creates an empty vector, which will ultimately contain the means of our 1000 samples.
+  for(j in 1:1000){ #Iterates from 1 to 1000
+    s <- faithful[sample(rows, rows*i),] #At each iteration sets s equal to a random sample containing
+    #1, 10, 25, or 50 percent of the items in faithful, depending on our position in the loop. 
+    means[j] = mean(s$eruptions) #Sets the jth value of means to equal the mean of our jth sample. 
+    if(j==1000){ #Once we have taken 1000 samples we add our means vector to the floop_data df. 
+      floop_data[paste0('Sample_', i)] <- means #We name the column using the paste function, which combines the string 'Sample', with the number i, which varies according to our position in the loop.
+    }
+  }
+}
+
+floop_data[1] <- NULL #Here, we get rid of the first column of our data frame, which contains the vector 1:1000.
+
+###GRID OF HISTOGRAMS FOR MEANS OF 1,000 SAMPLES 
+fmean_hist1 <- ggplot(floop_data, aes(x=Sample_0.01)) 
+fmean_hist1 <- fmean_hist1 + geom_histogram() + labs(title = '1% Sample Means') #Create a histogram of the values corresponding to the means of our 1000 samples of 1% of the overall data. 
+
+fmean_hist10 <- ggplot(floop_data, aes(x=Sample_0.1)) #We do the same for the other three columns of our floop_data data frame. 
+fmean_hist10 <- fmean_hist10 + geom_histogram() + labs(title = '10% Sample Means') 
+
+fmean_hist25 <- ggplot(floop_data, aes(x=Sample_0.25)) 
+fmean_hist25 <- fmean_hist25 + geom_histogram() + labs(title = '25% Sample Means') 
+
+fmean_hist50 <- ggplot(floop_data, aes(x=Sample_0.5)) 
+fmean_hist50 <- fmean_hist50 + geom_histogram() + labs(title = '50% Sample Means') 
+
+fmean_hist80 <- ggplot(floop_data, aes(x=Sample_0.8)) 
+fmean_hist80 <- fmean_hist80 + geom_histogram() + labs(title = '80% Sample Means') 
+
+grid.newpage() #The remainder of the code for number 4 is recycled from problem 2. 
+pushViewport(viewport(layout = grid.layout(2,3))) 
+
+vplayout <- function(x,y) 
+viewport(layout.pos.row = x, layout.pos.col = y) 
+
+print(fmean_hist1, vp = vplayout(1,1)) 
+print(fmean_hist10, vp = vplayout(1,2)) 
+print(fmean_hist25, vp = vplayout(1,3))
+print(fmean_hist50, vp = vplayout(2,1))
+print(fmean_hist80, vp = vplayout(2,2))
+print(fhist100, vp = vplayout(2,3)) 
+
+### APPENDING TO FSAMPLEFRAME 
+
+ResampleMinimum <- c(min(floop_data$Sample_0.01), min(floop_data$Sample_0.1), min(floop_data$Sample_0.25), min(floop_data$Sample_0.5), min(floop_data$Sample_0.8), min(fsample100$eruptions)) #This creates a vector called ResampleMinimum. It contains the minimum values of the five columns in 3, as well as the 100% sample. We do this by using the min function on the columns of floop_data. 
+
+ResampleMaximum <- c(max(floop_data$Sample_0.01), max(floop_data$Sample_0.1), max(floop_data$Sample_0.25), max(floop_data$Sample_0.5), max(floop_data$Sample_0.8), max(fsample100$eruptions)) #We calculate vectors for the Maximum, Mean, and Variance similarly. 
+
+ResampleMean <- c(mean(floop_data$Sample_0.01), mean(floop_data$Sample_0.1), mean(floop_data$Sample_0.25), mean(floop_data$Sample_0.5), mean(floop_data$Sample_0.8), mean(fsample100$eruptions))
+
+ResampleVariance <- c(var(floop_data$Sample_0.01), var(floop_data$Sample_0.1), var(floop_data$Sample_0.25), var(floop_data$Sample_0.5), var(floop_data$Sample_0.8), var(fsample100$eruptions))
+
+fsampleframe <- rbind(fsampleframe, ResampleMinimum, ResampleMaximum, ResampleMean, ResampleVariance)
+#We then add these rows to our df fsampleframe. We do this with the rbind function, which we can use to append the rows we have created to our fsampleframe. The output is assigned to the dataframe fsampleframe. 
+
+rownames(fsampleframe) <- c('Sample Minimum', 'Sample Maximum', 'Sample Mean', 'Sample Variance', 'ResampleMinimum', 'ResampleMaximum', 'ResampleMean', 'ResampleVariance') #We rename the rows so that the four rows that we added are named appropriately. 
+
+fsampleframe
+
+### HISTOGRAM WITH VLINES FOR INDIVIDUAL SAMPLE MEANS 
+
+ftotal_hist <- fhist100 + geom_vline(aes(xintercept=mean(fsample1$eruptions), color="1_Percent"), size=1, show_guide=TRUE) + geom_vline(aes(xintercept=mean(fsample10$eruptions), color="10_Percent"), size=1, show_guide=TRUE) + geom_vline(aes(xintercept=mean(fsample25$eruptions), color="25_Percent"), size=1, show_guide=TRUE) + geom_vline(aes(xintercept=mean(fsample50$eruptions), color="50_Percent"), size=1, show_guide=TRUE) + geom_vline(aes(xintercept=mean(fsample80$eruptions), color="80_Percent"), size=1, show_guide=TRUE) + scale_colour_brewer(name = 'Sample Means', palette = 'Set1') + labs(title = '100% Sample with Sample Means')
+
+
+print(ftotal_hist)
+
+### HISTOGRAM WITH VLINES FOR RESAMPLE MEANS 
+
+resample_ftotal_hist <- fhist100 + geom_vline(aes(xintercept=ResampleMean[1], color="1_Percent"), size=1, show_guide=TRUE) + geom_vline(aes(xintercept=ResampleMean[2], color="10_Percent"), size=1, show_guide=TRUE) + geom_vline(aes(xintercept=ResampleMean[3], color="25_Percent"), size=1, show_guide=TRUE) + geom_vline(aes(xintercept=ResampleMean[4], color="50_Percent"), size=1, show_guide=TRUE) + geom_vline(aes(xintercept=ResampleMean[5], color="80_Percent"), size=1, show_guide=TRUE) + scale_colour_brewer(name = 'Resample Means', palette = 'Set1') + labs(title = '100% Sample with Sample Means')
+
+print(resample_ftotal_hist)
+
+```
+
+Now, diamonds:
+```{r}
+###SAMPLING FROM DATA 
+
+data(diamonds) #Import diamonds data frame. 
+
+rows <- nrow(diamonds) #Taking samples of varying sizes from the faithful data frame, in the same way done for abalone. See #1 for detailed explanation 
+dsample1 <- diamonds[sample(rows, rows*.01),] 
+dsample10 <- diamonds[sample(rows, rows*.1),] 
+dsample25 <- diamonds[sample(rows, rows*.25),]
+dsample50 <- diamonds[sample(rows, rows*.5),]
+dsample80 <- diamonds[sample(rows, rows*.8),]
+dsample100 <- diamonds[sample(rows, rows),]
+
+ddata1 <- c(min(dsample1$carat), max(dsample1$carat), mean(dsample1$carat), var(dsample1$carat)) #Creating vectors containing min, max, mean, var of the samples we took above. 
+ddata10 <- c(min(dsample10$carat), max(dsample10$carat), mean(dsample10$carat), var(dsample10$carat)) 
+ddata25 <- c(min(dsample25$carat), max(dsample25$carat), mean(dsample25$carat), var(dsample25$carat)) 
+ddata50 <- c(min(dsample50$carat), max(dsample50$carat), mean(dsample50$carat), var(dsample50$carat)) 
+ddata80 <- c(min(dsample80$carat), max(dsample80$carat), mean(dsample80$carat), var(dsample80$carat)) 
+ddata100 <- c(min(dsample100$carat), max(dsample100$carat), mean(dsample100$carat), var(dsample100$carat))
+                                                                                        
+dsampleframe <- data.frame(ddata1, ddata10, ddata25, ddata50, ddata80, ddata100) #Create data frame containing the ddata vectors as columns. 
+
+rownames(dsampleframe) <- c('Sample Minimum', 'Sample Maximum', 'Sample Mean', 'Sample Variance') #Rename the rows of our data frame appropriately. 
+
+dsampleframe
+
+
+#### CREATING HISTOGRAMS 
+
+dhist1 <- ggplot(dsample1, aes(x=carat)) 
+dhist1 <- dhist1 + geom_histogram() + labs(title = '1% Sample') #Creates histogram of our samples using ggplot. 
+
+dhist10 <- ggplot(dsample10, aes(x=carat)) 
+dhist10 <- dhist10 + geom_histogram() + labs(title = '10% Sample')
+
+dhist25 <- ggplot(dsample25, aes(x=carat)) 
+dhist25 <- dhist25 + geom_histogram() + labs(title = '25% Sample')
+
+dhist50 <- ggplot(dsample50, aes(x=carat)) 
+dhist50 <- dhist50 + geom_histogram() + labs(title = '50% Sample')
+
+dhist80 <- ggplot(dsample80, aes(x=carat)) 
+dhist80 <- dhist80 + geom_histogram() + labs(title = '80% Sample')
+
+dhist100 <- ggplot(dsample100, aes(x=carat)) 
+dhist100 <- dhist100 + geom_histogram() + labs(title = '100% Sample')
+
+grid.newpage() #Now we have to create a grid of histograms. We will do this using the grid package, the same as we did for abalone. 
+pushViewport(viewport(layout = grid.layout(2,3))) 
+
+vplayout <- function(x,y) 
+viewport(layout.pos.row = x, layout.pos.col = y) 
+
+print(dhist1, vp = vplayout(1,1))  
+print(dhist10, vp = vplayout(1,2)) 
+print(dhist25, vp = vplayout(1,3))
+print(dhist50, vp = vplayout(2,1))
+print(dhist80, vp = vplayout(2,2))
+print(dhist100, vp = vplayout(2,3))
+
+
+### TAKING 1,000 SAMPLES AT EACH SAMPLE SIZE 
+
+sizes <- c(.01, .10, .25, .50, .80) 
+
+dloop_data = data.frame(1:1000) 
+
+for(i in sizes){ #Loops through each of our sample sizes
+  means = c() #Creates an empty vector, which will ultimately contain the means of our 1000 samples.
+  for(j in 1:1000){ #Iterates from 1 to 1000
+    s <- diamonds[sample(rows, rows*i),] #At each iteration sets s equal to a random sample containing
+    #1, 10, 25, or 50 percent of the items in faithful, depending on our position in the loop. 
+    means[j] = mean(s$carat) #Sets the jth value of means to equal the mean of our jth sample. 
+    if(j==1000){ #Once we have taken 1000 samples we add our means vector to the floop_data df. 
+      dloop_data[paste0('Sample_', i)] <- means #We name the column using the paste function, which combines the string 'Sample', with the number i, which varies according to our position in the loop.
+    }
+  }
+}
+
+dloop_data[1] <- NULL #Here, we get rid of the first column of our data frame, which contains the vector 1:1000.
+
+###GRID OF HISTOGRAMS FOR MEANS OF 1,000 SAMPLES 
+dmean_hist1 <- ggplot(dloop_data, aes(x=Sample_0.01)) 
+dmean_hist1 <- dmean_hist1 + geom_histogram() + labs(title = '1% Sample Means') #Create a histogram of the values corresponding to the means of our 1000 samples of 1% of the overall data. 
+
+dmean_hist10 <- ggplot(dloop_data, aes(x=Sample_0.1)) #We do the same for the other three columns of our dloop_data data frame. 
+dmean_hist10 <- dmean_hist10 + geom_histogram() + labs(title = '10% Sample Means') 
+
+dmean_hist25 <- ggplot(dloop_data, aes(x=Sample_0.25)) 
+dmean_hist25 <- dmean_hist25 + geom_histogram() + labs(title = '25% Sample Means') 
+
+dmean_hist50 <- ggplot(dloop_data, aes(x=Sample_0.5)) 
+dmean_hist50 <- dmean_hist50 + geom_histogram() + labs(title = '50% Sample Means') 
+
+dmean_hist80 <- ggplot(dloop_data, aes(x=Sample_0.8)) 
+dmean_hist80 <- dmean_hist80 + geom_histogram() + labs(title = '80% Sample Means') 
+
+grid.newpage() #The remainder of the code for number 4 is recycled from problem 2. 
+pushViewport(viewport(layout = grid.layout(2,3))) 
+
+vplayout <- function(x,y) 
+viewport(layout.pos.row = x, layout.pos.col = y) 
+
+print(dmean_hist1, vp = vplayout(1,1)) 
+print(dmean_hist10, vp = vplayout(1,2)) 
+print(dmean_hist25, vp = vplayout(1,3))
+print(dmean_hist50, vp = vplayout(2,1))
+print(dmean_hist80, vp = vplayout(2,2))
+print(dhist100, vp = vplayout(2,3)) 
+
+
+### APPENDING TO DSAMPLEFRAME 
+
+ResampleMinimum <- c(min(dloop_data$Sample_0.01), min(dloop_data$Sample_0.1), min(dloop_data$Sample_0.25), min(dloop_data$Sample_0.5), min(dloop_data$Sample_0.8), min(dsample100$carat)) #This creates a vector called ResampleMinimum. It contains the minimum values of the five columns in 3, as well as the 100% sample. We do this by using the min function on the columns of floop_data. 
+
+ResampleMaximum <- c(max(dloop_data$Sample_0.01), max(dloop_data$Sample_0.1), max(dloop_data$Sample_0.25), max(dloop_data$Sample_0.5), max(dloop_data$Sample_0.8), max(dsample100$carat)) #We calculate vectors for the Maximum, Mean, and Variance similarly. 
+
+ResampleMean <- c(mean(dloop_data$Sample_0.01), mean(dloop_data$Sample_0.1), mean(dloop_data$Sample_0.25), mean(dloop_data$Sample_0.5), mean(dloop_data$Sample_0.8), mean(dsample100$carat))
+
+ResampleVariance <- c(var(dloop_data$Sample_0.01), var(dloop_data$Sample_0.1), var(dloop_data$Sample_0.25), var(dloop_data$Sample_0.5), var(dloop_data$Sample_0.8), var(dsample100$carat))
+
+dsampleframe <- rbind(dsampleframe, ResampleMinimum, ResampleMaximum, ResampleMean, ResampleVariance)
+#We then add these rows to our df fsampleframe. We do this with the rbind function, which we can use to append the rows we have created to our fsampleframe. The output is assigned to the dataframe fsampleframe. 
+
+rownames(dsampleframe) <- c('Sample Minimum', 'Sample Maximum', 'Sample Mean', 'Sample Variance', 'ResampleMinimum', 'ResampleMaximum', 'ResampleMean', 'ResampleVariance') #We rename the rows so that the four rows that we added are named appropriately. 
+
+dsampleframe
+
+
+### HISTOGRAM WITH VLINES FOR INDIVIDUAL SAMPLE MEANS 
+
+dtotal_hist <- dhist100 + geom_vline(aes(xintercept=mean(dsample1$carat), color="1_Percent"), size=1, show_guide=TRUE) + geom_vline(aes(xintercept=mean(dsample10$carat), color="10_Percent"), size=1, show_guide=TRUE) + geom_vline(aes(xintercept=mean(dsample25$carat), color="25_Percent"), size=1, show_guide=TRUE) + geom_vline(aes(xintercept=mean(dsample50$carat), color="50_Percent"), size=1, show_guide=TRUE) + geom_vline(aes(xintercept=mean(dsample80$carat), color="80_Percent"), size=1, show_guide=TRUE) + scale_colour_brewer(name = 'Sample Means', palette = 'Set1') + labs(title = '100% Sample with Sample Means')
+
+
+print(dtotal_hist)
+
+### HISTOGRAM WITH VLINES FOR RESAMPLE MEANS 
+
+resample_dtotal_hist <- dhist100 + geom_vline(aes(xintercept=ResampleMean[1], color="1_Percent"), size=1, show_guide=TRUE) + geom_vline(aes(xintercept=ResampleMean[2], color="10_Percent"), size=1, show_guide=TRUE) + geom_vline(aes(xintercept=ResampleMean[3], color="25_Percent"), size=1, show_guide=TRUE) + geom_vline(aes(xintercept=ResampleMean[4], color="50_Percent"), size=1, show_guide=TRUE) + geom_vline(aes(xintercept=ResampleMean[5], color="80_Percent"), size=1, show_guide=TRUE) + scale_colour_brewer(name = 'Resample Means', palette = 'Set1') + labs(title = '100% Sample with Sample Means')
+
+print(resample_dtotal_hist)
+```
+
+
+
+9. Provide	a	brief	explanation	of	what	you	observe	in	the	measures	and	
+histograms	as	it	relates	to	sample size	and	resampling. 
+
+As our sample size gets larger and larger, we tend to see the sample means getting closer to the mean of the original distribution. With resampling, all resample means approach the distribution's mean. 
+
