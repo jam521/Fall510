@@ -8,6 +8,7 @@ output: html_document
 require(ggplot2)
 ```
 
+SW: nice job.
 
 Using	the	diamonds	data:
 
@@ -49,6 +50,9 @@ for(i in 1:(length(cols)-1)){ #Goes through every number from 1 to the length of
     }
   }
 }
+
+# SW: you will generally not want to use the string 'N/A' to represent a 
+# missing or inapplicable value; instead, use the value NA; see is.na()
 
 pairs 
 correlations
