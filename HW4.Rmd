@@ -46,6 +46,7 @@ rep(e, len = 31) #Replicates the vector e until 31 numbers have been printed. Th
 g) (4,4,...,4,6,6,...,6,3,3,...,3)	where	there	are	10	occurrences	of	4,	20	occurrences	of	6	and	30	occurrences	of	3.
 ```{r}
 rep(e, c(10,20,30)) #Replicates the vector e with the first number therein printed 10 times, the second 20 times, and the third 30 times. 
+# SW: nice, you can also try 10 * 1:3 vs c(10,20,30)
 ```
 
 2) Create	a	vector	of	the	values	of	(e^x)cos(x)	at	x	=	3,3.1,3.2,...,5.9,6.
@@ -60,8 +61,15 @@ a) (0.1^3, 0.2^1, 0.1^6, 0.2^4, 0.1^9, 0.2^7,...,0.1^36, 0.2^34)
 first = seq(3,36,3) #Creates a vector that goes from 3 to 36 counting by 3
 second = seq(1,34,3) #Creates a vector that goes from 1 to 34 counting by 3
 exponents = c(rbind(first,second)) #The rbind function creates a vector that alternates the elements of the inputted vectors. Here, we have alternated the lists first and second, which gives us a list corresponding to the exponents we want to utilize.  
+# SW: check the return type from rbind(), it's not a vector, though you coerce
+# it to one
+
 base = rep(c(0.1,0.2), len = 24) #Creates a vector of alternating 0.1s and 0.2s 24 elements long. 
 base ^ exponents #Creates a vector where each element i is the ith element of base put to the power of the ith element of exponents. 
+
+# SW: lost points: this is the wrong vector, you're looking for a product
+e1 <- seq(3,36,3)
+0.1^e1 * 0.2 ^ (e1 - 2)
 ```
 b) (2, (2^2)/2, (2^3)/3 ,..., (2^25)/25)
 ```{r}
@@ -87,6 +95,8 @@ sum((2^f)/f + (3^f)/(f^2)) #Performs the operation required on each element of f
 a) ("label	1",	"label	2",	.....,	"label	30"). Note	that	there	is	a single	space	between	label	and	the	number following. 
 ```{r}
 paste(rep("label", len=30), 1:30) #The paste function puts converts its inputs into strings and puts them together. Here the items inputted into paste are rep("label", len=30), which is a vector of the word "label" printed 30 times, and 1:30, or a vector that counts up from 1 to 30. This outputs the vector "label 1", "label 2"...."label 30".
+# SW: you don't need to call rep() for "label"
+paste("label", 1:30)
 ```
 
 b. ("fn1",	"fn2",	...,	"fn30").	In	this	case,	there	is	no	space	between	fn and	the	number	following.
@@ -119,6 +129,8 @@ c. Create the vector (x1 + 2x2 -x3,...,xn-2 + 2xn-1 - xn )
 ```{r}
 #We need 83 1s, 83 2s, and 84 -1s. 
 xVec*rep(c(1,2,-1), len = 250) #Here we are multiplying our xVec's elements by the corresponding vector we are creating with the rep function. This vector consists of the vector 1, 2, -1 repeated until it reaches the length 250 (i.e. the length of our xVec.)
+# SW: lost points: this is the wrong vector
+xVec[1:248] + 2 * xVec[2:249] - xVec[3:250]
 ```
 
 d. Calculate the sum of e^(-x(i+1)) / (xi + 10) from i = 1 to i = n-1. 
@@ -169,6 +181,7 @@ xVec[order(yVec)] #order(yVec) orders yVec's elements from lowest to highest and
 h. Pick	out	the	elements	in	yVec	at	index	positions	1,4,7,10,13,…
 ```{r}
 xVec[seq(1, 250, 3)] #Seq(1, 250, 3) creates a vector going from 1 to 250 in increments of 3. Putting this in brackets after xVec returns the values of xVec corresponding to corresponding to the index positions seq(1, 250, 30).
+# SW: lost points: wrong vector, should be yVec
 ```
 
 8. By using the function cumprod or otherwise, calculate:
