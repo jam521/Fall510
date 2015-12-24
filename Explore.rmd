@@ -5,6 +5,7 @@ date: "October 19, 2015"
 output: html_document
 ---
 
+SW: overall, good work. you should add labels to the plots of the binary and categorical variables so it is clear what is being plotted. and, your function doesn't formally return anything, make sure to call `return` explicitly. finally, you were supposed to return a list whose elements are specified in the assignment, but you don't return anything, much less a list. you build separate data frames; they should be combined.
 
 ```{r}
 require(ggplot2)
